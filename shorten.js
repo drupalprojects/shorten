@@ -1,4 +1,3 @@
-// $Id$
 
 Drupal.behaviors.shorten = function (context) {
   shorten = $('#edit-shortened-url')[0];

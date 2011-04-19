@@ -426,35 +426,44 @@ function shorten_form_display() {
 /**
  * Builds a form which allows shortening of a URL via the UI.
  */
-function shorten_form_shorten() {
+function shorten_form_shorten(&$form_state) {
   $form['#cache'] = TRUE;
+  drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
   //Form elements between ['opendiv'] and ['closediv'] will be refreshed via AHAH on form submission.
   $form['opendiv'] = array(
     '#value' => '<div id="shorten_replace">',
   );
-  drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
-  if (isset($_SESSION['shorten']) && $_SESSION['shorten']) {
-    $form['shortened_url'] = array(
+  if (!isset($form_state['storage'])) {
+    $form_state['storage'] = array('step' => 0);
+  }
+  if (isset($form_state['storage']['short_url'])) {
+    // This whole "step" business keeps the form element from being cached.
+    $form['shortened_url_'. $form_state['storage']['step']] = array(
       '#type' => 'textfield',
       '#title' => t('Shortened URL'),
-      '#default_value' => check_plain($_SESSION['shorten']),
+      '#default_value' => $form_state['storage']['short_url'],
       '#size' => 25,
+      '#attributes' => array('class' => 'shorten-shortened-url'),
     );
-    unset($_SESSION['shorten']);
   }
-  $form['url'] = array(
+  $form['url_'. $form_state['storage']['step']] = array(
     '#type' => 'textfield',
     '#title' => t('URL'),
     '#default_value' => '',
     '#required' => TRUE,
     '#size' => 25,
     '#maxlength' => 2048,
+    '#attributes' => array('class' => 'shorten-long-url'),
   );
   //Form elements between ['opendiv'] and ['closediv'] will be refreshed via AHAH on form submission.
   $form['closediv'] = array(
     '#value' => '</div>',
   );
-  $service = _shorten_service_form();
+  $last_service = NULL;
+  if (isset($form_state['storage']['service'])) {
+    $last_service = $form_state['storage']['service'];
+  }
+  $service = _shorten_service_form($last_service);
   if (is_array($service)) {
     $form['service'] = $service;
   }
@@ -480,7 +489,7 @@ function shorten_form_shorten() {
  * period in the string, because there must be a TLD, and we check length.
  */
 function shorten_form_shorten_validate($form, &$form_state) {
-  $url = $form_state['values']['url'];
+  $url = $form_state['values']['url_'. $form_state['storage']['step']];
   if (drupal_strlen($url) > 4) {
     if (!strpos($url, '.', 1)) {
       form_set_error('url', t('Please enter a valid URL.'));
@@ -499,13 +508,23 @@ function shorten_form_shorten_submit($form, &$form_state) {
   if ($form_state['values']['service']) {
     $service = $form_state['values']['service'];
   }
-  $shortened = shorten_url($form_state['values']['url'], $service);
-  $_SESSION['shorten'] = $shortened;
+  $shortened = shorten_url($form_state['values']['url_'. $form_state['storage']['step']], $service);
   if ($form_state['values']['service']) {
     $_SESSION['shorten_service'] = $form_state['values']['service'];
   }
+  drupal_set_message(t('%original was shortened to %shortened', array('%original' => $form_state['values']['url_'. $form_state['storage']['step']], '%shortened' => $shortened)));
   $form_state['rebuild'] = TRUE;
-  drupal_set_message(t('%original was shortened to %shortened', array('%original' => $form_state['values']['url'], '%shortened' => $shortened)));
+  if (empty($form_state['storage'])) {
+    $form_state['storage'] = array();
+  }
+  $form_state['storage']['short_url'] = $shortened;
+  $form_state['storage']['service'] = $form_state['values']['service'];
+  if (isset($form_state['storage']['step'])) {
+    $form_state['storage']['step']++;
+  }
+  else {
+    $form_state['storage']['step'] = 0;
+  }
 }
 
 /**
@@ -528,8 +547,9 @@ function shorten_save_js() {
   drupal_process_form($form_id, $form, $form_state);
   $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
   //Get HTML for the replacement form. Only these elements will be AHAH-refreshed.
-  $new_form['shortened_url'] = $form['shortened_url'];
-  $new_form['url'] = $form['url'];
+  $step = $form_state['storage']['step'];
+  $new_form['shortened_url_'. $step] = $form['shortened_url_'. $step];
+  $new_form['url_'. $step] = $form['url_'. $step];
   //If the $form['save']['#ahah']['wrapper'] div was found in a #prefix or #suffix of a form element that we re-rendered here,
   //then we would have to unset() it to prevent duplicate wrappers. However, we have a somewhat unique implementation in which the wrappers
   //are actually their own elements, so this is not an issue.
@@ -540,8 +560,11 @@ function shorten_save_js() {
 
 /**
  * Form which displays a list of URL shortening services.
+ *
+ * @param $last_service
+ *   The last service used on this page, if applicable.
  */
-function _shorten_service_form() {
+function _shorten_service_form($last_service = NULL) {
   if (variable_get('shorten_show_service', FALSE) && _shorten_method_default() != 'none') {
     $all_services = module_invoke_all('shorten_service');
     $services = array();
@@ -558,6 +581,10 @@ function _shorten_service_form() {
     //Remember the last service that was used.
     if (isset($_SESSION['shorten_service']) && $_SESSION['shorten_service']) {
       $default = $_SESSION['shorten_service'];
+    }
+    //Anonymous users don't have $_SESSION in Pressflow, so we use the last service used on this page, if applicable.
+    if (!empty($last_service)) {
+      $default = $last_service;
     }
     $count = count($services);
     if ($count > 1) {

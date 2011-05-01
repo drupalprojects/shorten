@@ -76,6 +76,7 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
     $block['shorten']['visibility'] = 0;
     $block['shorten']['pages'] = 'shorten';
     $block['shorten_short']['info'] = t('Short URL');
+    $block['shorten_short']['cache'] = BLOCK_CACHE_PER_PAGE;
     return $block;
   }
   elseif ($op == 'view' && $delta == 'shorten') {

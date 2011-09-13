@@ -117,8 +117,8 @@ function shorten_admin($form_state) {
   );
   $form['shorten_cache_fail_duration'] = array(
     '#type' => 'textfield',
-    '#field_prefix' => t('On failure, cache full URLs for') . ' ',
-    '#field_suffix' => ' ' . t('seconds'),
+    '#field_prefix' => t('On failure, cache full URLs for') .' ',
+    '#field_suffix' => ' '. t('seconds'),
     '#description' => t('When a shortener service is unavilable, the full URL will be cached temporarily to prevent more requests from overloading the server.') .' '.
       t('Enter the number of seconds for which you would like to store these full URLs when shortening the URL fails.') .' '.
       t('The default value is 1800 (30 minutes).'),

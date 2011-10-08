@@ -128,10 +128,12 @@ function shorten_url($original = '', $service = '') {
   if (!$service) {
     $service = variable_get('shorten_service', 'is.gd');
   }
+  //First try to retrieve a value from the cache.
   $cached = cache_get($original, 'cache_shorten');
   if (!empty($cached->data) && time() < $cached->expire) {
     return $cached->data;
   }
+  //We don't have anything cached for this URL, so try the primary service (or the one explicitly requested in the $service parameter).
   $services = module_invoke_all('shorten_service');
   if (isset($services[$service])) {
     $url = _shorten_get_url($original, $services[$service], $service);
@@ -163,8 +165,8 @@ function shorten_url($original = '', $service = '') {
       }
     }
   }
+  //Cache the result for a limited time.
   $cache_duration = variable_get('shorten_cache_duration', 1814400);
-  //Only cache failed retrievals for a limited amount of time.
   if ($url == $original) {
     $expire = time() + variable_get('shorten_cache_fail_duration', 1800);
   }
@@ -175,6 +177,7 @@ function shorten_url($original = '', $service = '') {
     $expire = CACHE_PERMANENT;
   }
   cache_set($original, $url, 'cache_shorten', $expire);
+  //Announce that we have a new short URL and return it.
   module_invoke_all('shorten_create', $original, $url, $service);
   return $url;
 }
@@ -371,13 +374,13 @@ function _shorten_shurly($original) {
 function shorten_fetch($url, $tag = '', $special = '') {
   //drupal_http_request() does not offer a reliable way to time out.
   if (variable_get('shorten_method', _shorten_method_default()) == 'php') {
-    $context = stream_context_create(array('http' => array('timeout' => 3))); 
+    $context = stream_context_create(array('http' => array('timeout' => variable_get('shorten_timeout', 3)))); 
     $contents = file_get_contents($url, 0, $context);
   }
   elseif (variable_get('shorten_method', _shorten_method_default()) == 'curl') {
     $c = curl_init();
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 3);
+    curl_setopt($c, CURLOPT_CONNECTTIMEOUT, variable_get('shorten_timeout', 3));
     curl_setopt($c, CURLOPT_URL, $url);
     $contents = curl_exec($c);
     curl_close($c);

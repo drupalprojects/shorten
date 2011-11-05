@@ -1,3 +1,4 @@
 name = Shorten URLs
 description = "Allows easy URL shortening via external services."
 core = 6.x
+package = Shorten URLs

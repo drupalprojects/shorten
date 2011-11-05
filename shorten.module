@@ -374,7 +374,7 @@ function _shorten_shurly($original) {
 function shorten_fetch($url, $tag = '', $special = '') {
   //drupal_http_request() does not offer a reliable way to time out.
   if (variable_get('shorten_method', _shorten_method_default()) == 'php') {
-    $context = stream_context_create(array('http' => array('timeout' => variable_get('shorten_timeout', 3)))); 
+    $context = stream_context_create(array('http' => array('timeout' => variable_get('shorten_timeout', 3))));
     $contents = file_get_contents($url, 0, $context);
   }
   elseif (variable_get('shorten_method', _shorten_method_default()) == 'curl') {

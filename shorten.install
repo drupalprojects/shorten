@@ -27,6 +27,8 @@ function shorten_schema(){
 function shorten_uninstall() {
   drupal_uninstall_schema('shorten');
 
+  // The adjix and adjix_custom variables aren't used any more but they should
+  // still be deleted from installations that previously used them.
   variable_del('shorten_ez');
   variable_del('shorten_www');
   variable_del('shorten_adjix');

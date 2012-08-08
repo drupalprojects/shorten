@@ -20,6 +20,13 @@ function shorten_cs_services_table() {
   $rows = array();
   $result = db_query("SELECT * FROM {shorten_cs} ORDER BY name ASC");
   while ($service = db_fetch_array($result)) {
+    $service = array(
+      'sid' => $service['sid'],
+      'name' => check_plain($service['name']),
+      'url' => check_plain($service['url']),
+      'type' => $service['type'],
+      'tag' => check_plain($service['tag']),
+    );
     $service['actions'] = l(t('edit'), 'admin/settings/shorten/custom/edit/'. $service['sid']) .' '.
       l(t('delete'), 'admin/settings/shorten/custom/delete/'. $service['sid']);
     unset($service['sid']);

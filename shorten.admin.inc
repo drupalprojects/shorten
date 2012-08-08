@@ -146,7 +146,7 @@ function shorten_admin($form_state) {
     '#description' => t('Checking the box next to a service will make it <strong>unavailable</strong> for use in the Shorten URLs block and page. '.
       'If you disallow all services, the primary service will be used.'),
     '#default_value' => variable_get('shorten_invisible_services', array()),
-    '#options' => $services,
+    '#options' => array_map('check_plain', $services),
   );
   return system_settings_form($form);
 }

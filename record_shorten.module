@@ -95,8 +95,8 @@ function record_shorten_records_table() {
   $header = array(t('Original'), t('Short'), t('Service'));
   $rows = array();
   $result = pager_query("SELECT original, short, service FROM {record_shorten} ORDER BY sid DESC");
-  while ($row = db_fetch_array($result)) {
-    $rows[] = $row;
+  while ($row = db_fetch_object($result)) {
+    $rows[] = array(check_plain($row->original), check_plain($row->short), check_plain($row->service));
   }
   $output = theme('table', $header, $rows);
   $output .= theme('pager');

@@ -396,18 +396,31 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
     $c = curl_init();
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_CONNECTTIMEOUT, $options['timeout']);
-    //curl_setopt($c, CURLOPT_FOLLOWLOCATION, TRUE);
+    // https://drupal.org/node/1481634
+    //if (ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
+    //  curl_setopt($c, CURLOPT_FOLLOWLOCATION, TRUE);
+    //}
     curl_setopt($c, CURLOPT_MAXREDIRS, $options['max_redirects']);
+    // defined() checks due to https://drupal.org/node/1469400
+    // Specifying the protocol is necessary to avoid malicious redirects to POP
+    // in libcurl 7.26.0 to 7.28.1
+    if (defined('CURLOPT_REDIR_PROTOCOLS') && defined('CURLPROTO_HTTP') && defined('CURLPROTO_HTTPS')) {
+      curl_setopt($c, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+    }
     curl_setopt($c, CURLOPT_URL, $url);
     if ($options['method'] != 'GET') {
       $uri = @parse_url($url);
       if ($uri['scheme'] == 'http') {
         curl_setopt($c, CURLOPT_PORT, isset($uri['port']) ? $uri['port'] : 80);
-        //curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTP);
+        if (defined('CURLOPT_PROTOCOLS') && defined('CURLPROTO_HTTP')) {
+          curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTP);
+        }
       }
       elseif ($uri['scheme'] == 'https') {
         curl_setopt($c, CURLOPT_PORT, isset($uri['port']) ? $uri['port'] : 443);
-        //curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+        if (defined('CURLOPT_PROTOCOLS') && defined('CURLPROTO_HTTPS')) {
+          curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+        }
       }
       if (!empty($options['headers'])) {
         $curl_headers = array();
@@ -688,7 +701,7 @@ function shorten_token_info() {
     $return['tokens']['node']['short-url'] = array(
       'name' => t('Short Url'),
       'description' => t('The shortened URL for the node.'),
-    );  
+    );
     return $return;
   }
 }

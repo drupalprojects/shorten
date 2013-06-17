@@ -21,7 +21,7 @@ function shorten_admin($form, $form_state) {
     '#type' => 'checkbox',
     '#title' => t('Use "www." instead of "http://"'),
     '#description' => t('"www." is shorter, but "http://" is automatically link-ified by more services.'),
-    '#default_value' => variable_get('shorten_www', TRUE),
+    '#default_value' => variable_get('shorten_www', FALSE),
   );
   $methods = array();
   if (function_exists('file_get_contents')) {

@@ -158,7 +158,7 @@ function shorten_url($original = '', $service = '') {
   }
   $url = trim($url); // Redundant for most services.
   // Replace "http://" with "www." if the URL is abbreviated because it's shorter.
-  if ($url != $original && variable_get('shorten_www', TRUE)) {
+  if ($url != $original && variable_get('shorten_www', FALSE)) {
     if (strpos($url, 'http://') === 0) {
       $url = drupal_substr($url, 7);
       if (strpos($url, 'www.') !== 0) {

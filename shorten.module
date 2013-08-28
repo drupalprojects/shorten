@@ -134,6 +134,7 @@ function shorten_url($original = '', $service = '') {
   if (!$original) {
     $original = url($_GET['q'], array('absolute' => TRUE, 'alias' => !variable_get('shorten_use_alias', 1)));
   }
+  $original = urlencode($original);
   if (!$service) {
     $service = variable_get('shorten_service', 'is.gd');
   }

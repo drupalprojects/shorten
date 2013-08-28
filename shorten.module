@@ -140,13 +140,13 @@ function shorten_url($original = '', $service = '') {
     $url = _shorten_get_url($original, $services[$service], $service);
   }
   //If the primary service fails, try the secondary service.
-  if (!$url) {
+  if (empty($url)) {
     $service = variable_get('shorten_service_backup', 'TinyURL');
     if (isset($services[$service])) {
       $url = _shorten_get_url($original, $services[$service], $service);
     }
     //If the secondary service fails, use the original URL.
-    if (!$url) {
+    if (empty($url)) {
       $url = $original;
     }
   }

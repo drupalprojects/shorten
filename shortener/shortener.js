@@ -21,6 +21,6 @@ Drupal.behaviors.shortener = function (context) {
     else {
       $(this).html(Drupal.t('expand'));
     }
-    $a.toggleClass('shortener-short shortener-long');
+    $a.toggleClass('shortener-short').toggleClass('shortener-long');
   });
 }

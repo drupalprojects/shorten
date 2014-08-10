@@ -1,4 +1,3 @@
-
 Drupal.behaviors.shorten = function (context) {
   // Make sure we can run context.find().
   var ctxt = $(context);
@@ -9,7 +8,7 @@ Drupal.behaviors.shorten = function (context) {
     shorten.focus();
   }
   shortenedURL.click(function() {
-    shorten.select();
-    shorten.focus();
+    this.select();
+    this.focus();
   });
-}
+};

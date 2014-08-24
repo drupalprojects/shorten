@@ -134,11 +134,11 @@ function shorten_url($original = '', $service = '') {
   if (!$original) {
     $original = url($_GET['q'], array('absolute' => TRUE, 'alias' => !variable_get('shorten_use_alias', 1)));
   }
-  $original = urlencode($original);
+  $original_for_caching = urlencode($original); // https://www.drupal.org/node/2324925
   if (!$service) {
     $service = variable_get('shorten_service', 'is.gd');
   }
-  $cached = cache_get($original, 'cache_shorten');
+  $cached = cache_get($original_for_caching, 'cache_shorten');
   if (!empty($cached->data) && REQUEST_TIME < $cached->expire) {
     return $cached->data;
   }
@@ -184,7 +184,7 @@ function shorten_url($original = '', $service = '') {
   else {
     $expire = CACHE_PERMANENT;
   }
-  cache_set($original, $url, 'cache_shorten', $expire);
+  cache_set($original_for_caching, $url, 'cache_shorten', $expire);
   module_invoke_all('shorten_create', $original, $url, $service);
   return $url;
 }
@@ -207,7 +207,7 @@ function _shorten_get_url($original, $api, $service) {
   $method = drupal_strtoupper(variable_get('shorten_method', _shorten_method_default()));
   $service = t('an unknown service');
   if (is_string($api)) {
-    $url = shorten_fetch($api . $original);
+    $url = shorten_fetch($api . urlencode($original));
     $service = $api;
   }
   elseif (is_array($api)) {
@@ -217,6 +217,7 @@ function _shorten_get_url($original, $api, $service) {
       'json' => FALSE,
     );
     if (!empty($api['url'])) {
+      $original = urlencode($original);
       // Typically $api['custom'] == 'xml' although it doesn't have to.
       if (!empty($api['tag'])) {
         $url = shorten_fetch($api['url'] . $original, $api['tag']);
@@ -294,11 +295,6 @@ function shorten_shorten_service() {
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
     'TinyURL' => 'http://tinyurl.com/api-create.php?url=',
   );
-  if (module_exists('shorturl')) {
-    $services['Drupal ShortURL module'] = array(
-      'custom' => '_shorten_shorturl',
-    );
-  }
   if (variable_get('shorten_cligs', '')) {
     $services['cli.gs'] = 'http://cli.gs/api/v1/cligs/create?appid=drupal&key=' . variable_get('shorten_cligs', '') . '&url=';
   }
@@ -337,13 +333,6 @@ function _shorten_googl($original) {
   }
   watchdog('shorten', 'Error fetching shortened URL from goo.gl.', array(), WATCHDOG_ERROR, $url);
   return FALSE;
-}
-
-/**
- * Helps get a shortened URL via the Short URLs module.
- */
-function _shorten_shorturl($original) {
-  return shorturl_shorten($original, TRUE);
 }
 
 /**

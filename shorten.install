@@ -24,6 +24,15 @@ function shorten_update_7001() {
 }
 
 /**
+ * Implements hook_update_N().
+ * Removes variables for deprecated services.
+ */
+function shorten_update_7002() {
+  variable_del('shorten_cligs');
+  variable_del('shorten_redirec');
+}
+
+/**
  * Implements hook_uninstall().
  */
 function shorten_uninstall() {
@@ -32,12 +41,10 @@ function shorten_uninstall() {
   variable_del('shorten_ez');
   variable_del('shorten_www');
   variable_del('shorten_adjix');
-  variable_del('shorten_cligs');
   variable_del('shorten_googl');
   variable_del('shorten_budurl');
   variable_del('shorten_fwd4me');
   variable_del('shorten_method');
-  variable_del('shorten_redirec');
   variable_del('shorten_service');
   variable_del('shorten_timeout');
   variable_del('shorten_bitly_key');

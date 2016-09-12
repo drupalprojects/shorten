@@ -285,24 +285,16 @@ function shorten_shorten_service() {
     );
   }
   $services += array(
-    'cli.gs' => 'http://cli.gs/api/v1/cligs/create?appid=drupal&url=',
     'is.gd' => 'http://is.gd/api.php?longurl=',
     'migre.me' => 'http://migre.me/api.txt?url=',
     'Metamark' => 'http://metamark.net/api/rest/simple?long_url=',
     'PeekURL' => 'http://peekurl.com/api.php?desturl=',
     'qr.cx' => 'http://qr.cx/api/?longurl=',
-    'redir.ec' => 'http://redir.ec/_api/rest/redirec/create?appid=drupal&url=',
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
     'TinyURL' => 'http://tinyurl.com/api-create.php?url=',
   );
-  if (variable_get('shorten_cligs', '')) {
-    $services['cli.gs'] = 'http://cli.gs/api/v1/cligs/create?appid=drupal&key=' . variable_get('shorten_cligs', '') . '&url=';
-  }
   if (variable_get('shorten_fwd4me', '')) {
     $services['fwd4.me'] = 'http://api.fwd4.me/?key=' . variable_get('shorten_fwd4me', '') . '&url=';
-  }
-  if (variable_get('shorten_redirec', '')) {
-    $services['redir.ec'] = 'http://redir.ec/_api/rest/redirec/create?appid=drupal&apikey=' . variable_get('shorten_redirec', '') . '&url=';
   }
   if (module_exists('shurly')) {
     $services['ShURLy'] = array(

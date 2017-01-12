@@ -1,3 +1,0 @@
-name = Shorten
-description = "Allows easy URL shortening via external services."
-core = 6.x

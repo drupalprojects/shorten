@@ -1,3 +1,0 @@
-name = Record Shorten
-description = "Records shortened URLs from the Shorten module."
-core = 6.x

@@ -19,16 +19,16 @@ function shorten_schema() {
  * Removes the shorten_generate_token variable since the token module now loads
  * tokens only when needed.
  */
-function shorten_update_7001() {
-  \Drupal::config('shorten.settings')->clear('shorten_generate_token')->save();
+function shorten_update_8001() {
+  \Drupal::configFactory()->getEditable('shorten.settings')->clear('shorten_generate_token')->save();
 }
 
 /**
  * Implements hook_update_N().
  * Removes variables for deprecated services.
  */
-function shorten_update_7002() {
-  \Drupal::config('shorten.settings')->clear('shorten_cligs')->save();
-  \Drupal::config('shorten.settings')->clear('shorten_redirec')->save();
+function shorten_update_8002() {
+  \Drupal::configFactory()->getEditable('shorten.settings')->clear('shorten_cligs')->save();
+  \Drupal::configFactory()->getEditable('shorten.settings')->clear('shorten_redirec')->save();
 }
 

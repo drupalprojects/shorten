@@ -78,8 +78,16 @@ function shorten_cs_add_form($form, &$form_state) {
   $form['tag'] = array(
     '#type' => 'textfield',
     '#title' => t('XML tag or JSON key'),
-    '#description' => t('The XML tag or JSON key that identifies the full short URL in the API response.') . ' ' .
-      t('Only required for XML and JSON response types.'),
+    '#description' => t('The XML tag or JSON key that identifies the full '
+      . 'short URL in the API response. Only required for XML and JSON response'
+      . ' types.<br>'
+      . 'For multidimensional JSON responses, a path can be specified using '
+      . 'dot notation in order to specify the element in containing the short '
+      . 'url. For example, the path \'data.url\' would point to the url '
+      . 'value in the following JSON response: <br>'
+      . '{"data":{"url":"http://ex.am/ple"}}<br>'
+      . 'If a JSON element name itself contains a dot character, it can be '
+      . 'wrapped in double quotes.')
   );
   $form['submit'] = array(
     '#type' => 'submit',

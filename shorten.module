@@ -435,13 +435,59 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
     }
     elseif ($special == 'json') {
       $contents = json_decode($contents, TRUE);
-      $contents = $contents[$tag];
+      $contents = shorten_get_value_from_array($contents, $tag);
     }
   }
   if (!$contents || $contents == $url) {
     return FALSE;
   }
   return $contents;
+}
+
+/**
+ * Extracts a value from an associative array given an element name or path.
+ *
+ * @param string $contents
+ *  The associative array containing the data to extract.
+ * @param string $expression
+ *  A single element name or a dot notation path expression.
+ *
+ * @return string
+ *  A value from the associative array.
+ */
+function shorten_get_value_from_array($contents, $expression) {
+  $exploded_expression = str_getcsv($expression, '.', '"', '\\');
+  if (count($exploded_expression) === 1) {
+    if (!isset($contents[$expression])) {
+      watchdog('shorten', 'json response does not contain specified member name or path expression: @expression', array('@expression' => $expression));
+      return NULL;
+    }
+    return $contents[$expression];
+  }
+  return shorten_get_path_in_array($contents, $exploded_expression);
+}
+
+/**
+ * Follows a path in a multidimensional array and returns a corresponding value.
+ *
+ * @param array $data
+ *  A single or multi dimensional array to extract a value from.
+ * @param array $path
+ *  An single dimensional array of the nested keys to look for in $data.
+ *
+ * @return
+ *  The value found at the end of the path followed in the data array.
+ */
+function shorten_get_path_in_array($data, $path) {
+  if (isset($path[0])) {
+    $element = $path[0];
+    array_shift($path);
+
+    if (isset($data[$element])) {
+      $data = shorten_get_path_in_array($data[$element], $path);
+    }
+  }
+  return $data;
 }
 
 /**
